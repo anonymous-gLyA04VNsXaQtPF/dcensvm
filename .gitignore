@@ -1,0 +1,53 @@
+# R specific files
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj.user
+*.Rhistory
+*.RData
+*.Ruserdata
+
+# Output directories that contain data files
+Output/*.RDS
+Output/*.RData
+Output/*.csv
+Output/*.pdf
+Output/*.tex
+Output/figs/*.pdf
+
+# Compiled code
+*.o
+*.so
+*.dll
+
+# Log and temporary files
+*.log
+*.out
+*.err
+*.tmp
+
+# Slurm output files
+run_all_simulations_*.out
+run_all_simulations_*.err
+slurm-*.out
+_rslurm*/
+
+# macOS specific
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Package building files
+*.tar.gz
+
+# Documentation build
+/doc/
+/Meta/
+archive
+*.Rmd
+acc_form.pdf
+
+.idea/

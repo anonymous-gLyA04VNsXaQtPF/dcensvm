@@ -1,0 +1,11 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^_rslurm
+^Output
+^[\.]RData$$
+^[\.]RDS$$
+^README\.Rmd$
+^run_all_simulations\.R$
+^archive$
+^acc_form\.Rmd$
+^acc_form\.pdf$

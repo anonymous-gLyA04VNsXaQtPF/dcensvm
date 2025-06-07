@@ -1,0 +1,156 @@
+# Simulation: Iteration under slurm jobs in HPC 
+# Section 4.2 Effect of Iterations
+# Different kernels converge with the number of iterations when $(n,p) = (100,50)$ and $(n,p) = (200,100)$. 
+
+rm(list = ls())
+simulation_name <- "iteration"
+
+library(dplyr)
+n_values <- c(200, 100)
+p_values <- c(100, 50)
+np_df <- data.frame(n = n_values, p = p_values)
+params_slurm <- expand.grid(
+  batch = 1:100,
+  np_index = 1:length(n_values),
+  kernel_type = 1:5
+) %>%
+  mutate(
+    n = n_values[np_index],
+    p = p_values[np_index]
+  ) %>%
+  dplyr::select(batch, n, p, kernel_type)
+
+# ============================================================== #
+# LOAD LIBRARY
+# ============================================================== #
+library(doRNG)
+library(foreach)
+library(doFuture)
+library(parallel)
+library(tictoc)
+library(MASS)
+library(pracma)
+library(igraph) # for graph
+library(glmnet)
+# library(ggplot2)
+library(dcensvm)
+library(hdsvm) # initial
+library(rslurm) # submit slurm jobs in HPC
+library(peakRAM) #  to check memory
+source("utils/sim_utils.R")
+
+# peakRAM::peakRAM(simulation(p = 500, rho = 0.5, batch = 1))
+
+
+sjob <- slurm_apply(simulation_iteration, params_slurm, nodes = 100,
+                    jobname = paste(simulation_name, Sys.time()),
+                    global_objects = ls(),
+                    slurm_options = list(time = "2:00:00", `mem-per-cpu` = "500MB"))
+
+
+# Save job object
+saveRDS(sjob, paste0("Output/", simulation_name, "_sjob.RDS"))
+saveRDS(sjob, paste0("Output/", paste(simulation_name, Sys.time()), "_sjob.RDS"))
+
+# rslurm::get_job_status(sjob)$queue
+
+# ====================================================== #
+# Collect results
+# ====================================================== #
+library(dplyr)
+library(xtable)
+
+sjob <- readRDS(paste0("Output/", simulation_name, "_sjob.RDS"))
+result <- get_slurm_out(sjob, "table", wait = T)
+saveRDS(result, paste0("Output/", simulation_name, "_all_result.RDS"))
+
+result <- result %>%
+  dplyr::select(starts_with("RMSE"),
+         setdiff(names(params_slurm), "batch"))
+
+
+out_table <- aggregate(as.formula(paste0(". ~ ", paste(setdiff(names(params_slurm), "batch"), collapse = "+"))),
+                       result, mean)
+out_table
+write.csv(out_table, paste0("Output/", simulation_name, "_result.csv"), row.names = F)
+saveRDS(out_table, paste0("Output/", simulation_name, "_result.RDS"))
+
+save.image(paste0("Output/", simulation_name, "_all_data.RData"))
+
+
+# ====================================================== #
+# Plot results
+# ====================================================== #
+
+plot_func <- function (result) {
+  op <- par(no.readonly = TRUE)
+fontsize <- 12
+type <- "l"
+lwd <- 2
+par(
+  font = fontsize,
+  font.axis = fontsize,
+  font.lab = fontsize,
+  font.main = fontsize,
+  font.sub = fontsize,
+  cex = 1.5,
+  mar = c(2,2,1,1)
+)
+plot(
+  colMeans(result[1,],na.rm = T)[1:501],
+  type = type,
+  lwd = lwd,
+  col = "black",#"firebrick",
+  ylim = c(0.2,0.9),#c(0, 1),  
+  xlab = "",
+  ylab = ""
+)
+lines(
+  colMeans(result[2,],na.rm = T)[1:501],#[202:401],#[1:201],
+  type = type,
+  pch = 2,
+  col = "gold2",#"black", #"gold2",#adjustcolor("gold2", alpha.f = 0.1),
+  lty = 2,
+  lwd = lwd
+)
+lines(
+  colMeans(result[3, ],na.rm = T)[1:501],#[202:401],#[1:201],
+  type = type,
+  pch = 5,
+  col =  "firebrick",#"blue3",#"springgreen4",#"blue3",
+  lty = "dotted",#5,
+  lwd = lwd
+)
+lines(
+  colMeans(result[4, ],na.rm = T)[1:501],#[202:401],#[1:201],
+  type = type,
+  pch = 4,
+  col =  "blue3",#"turquoise3",
+  lty = 3,
+  lwd = lwd
+)
+lines(
+  colMeans(result[5, ],na.rm = T)[1:501],#[202:401],#[1:201],
+  type = type,
+  pch = 4,
+  col =  "springgreen4",#"turquoise",#"blue3",#"darkorchid2",
+  lty = 4,
+  lwd = lwd
+)
+  par(op)
+}
+
+
+fig_dir <- "Output/figs"
+pdf(paste0(fig_dir, "/fig_iterations_kernel_type_p_50", ".pdf"))
+tmp <- out_table %>% filter(n == 100, p == 50) %>%
+    dplyr::select(starts_with("RMSE"))
+plot_func(tmp)
+dev.off()
+
+
+pdf(paste0(fig_dir, "/fig_iterations_kernel_type_p_100", ".pdf"))
+tmp <- out_table %>% filter(n == 200, p == 100) %>%
+    dplyr::select(starts_with("RMSE"))
+plot_func(tmp)
+dev.off()
