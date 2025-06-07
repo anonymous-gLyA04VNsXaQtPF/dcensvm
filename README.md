@@ -88,7 +88,8 @@ sbatch run_all_slurm.sh
 sbatch run_real_data_slurm.sh
 ```
 
-NOTE: sometimes, you need add the following comments to the header of the `submit_simulation.sh` file to make it 
+NOTE: sometimes, you need add the following comments to the header of the `run_all_slurm.sh` and 
+`run_real_data_slurm.sh` files to make it 
 work in your SLURM cluster. 
 Replace `YOUR_ACCOUNT_NAME` with your SLURM account name and `YOUR_EMAIL_ADDRESS_FOR_NOTIFICATION` with your email address to receive notifications about the job status.
 
