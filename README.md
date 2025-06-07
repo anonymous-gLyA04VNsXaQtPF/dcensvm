@@ -97,7 +97,21 @@ Replace `YOUR_ACCOUNT_NAME` with your SLURM account name and `YOUR_EMAIL_ADDRESS
 #SBATCH --mail-user=YOUR_EMAIL_ADDRESS_FOR_NOTIFICATION
 #SBATCH --mail-type=BEGIN,END,FAIL
 ```
-In addition you need specify a correct R version by modifying the following line based on you SLURM cluster configuration:
+
+We use R package `rslurm` to submit the jobs in SLURM. This means you need to configure the `rslurm` package to work 
+with your SLURM cluster according to the documentation [here](https://cran.r-project.org/web/packages/rslurm/vignettes/rslurm.html). In particular, you need to set the `account` to your SLURM 
+account name in the template file `/home/USERNAME/R/x86_64-pc-linux-gnu-library/4.4/rslurm/templates/submit_sh.txt`
+as follows:
+
+```bash
+#SBATCH --account=YOUR_ACCOUNT_NAME
+#SBATCH --mail-user=YOUR_EMAIL_ADDRESS_FOR_NOTIFICATION
+#SBATCH --mail-type=BEGIN,END,FAIL
+```
+
+
+In addition, you need specify a correct R version by modifying the following line based on you SLURM cluster 
+configuration:
 ```bash
 # Load necessary modules
 module load R/4.4.0
