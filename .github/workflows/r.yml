@@ -10,12 +10,11 @@ name: R
 
 on:
   push:
-    branches: [ "final" ]
-  pull_request:
-    branches: [ "final" ]
+    tags:
+      - 'v*'  # Triggers on version tags like v1.0.0, v2.3.1
 
 permissions:
-  contents: read
+  contents: write  # Required to create a GitHub Release
 
 jobs:
   build:
