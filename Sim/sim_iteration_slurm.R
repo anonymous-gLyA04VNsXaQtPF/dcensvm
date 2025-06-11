@@ -126,7 +126,7 @@ lines(
   type = type,
   pch = 4,
   col =  "blue3",#"turquoise3",
-  lty = 3,
+  lty = "longdash",#3,
   lwd = lwd
 )
 lines(
